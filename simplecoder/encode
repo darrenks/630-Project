@@ -1,0 +1,4 @@
+#!/usr/bin/ruby
+require 'predictor'
+require 'coder'
+print encode(gets(nil), Predictor.new)

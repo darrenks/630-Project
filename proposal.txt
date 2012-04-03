@@ -1,0 +1,28 @@
+Please complete the following information and send it to me (rance@cs.umd.edu) as an e-mail by 5 PM THURSDAY MARCH 6, 2012.
+
+1.  What is the topic of your project?
+Arithmetic Coding
+
+2.  Who are the team members (2-3) for your project?
+Yunus Basagalar and Darren Smith
+
+3.  What type of project (case study or research review) is it?
+Case Study
+
+4.  What resources (papers, web-sites, tools) will you use?
+
+Generating the proof:
+
+We will start with the simplest program for arithmetic coding that we can (specified length, infinite length integers) and try to do a proof. If we succeed we will try increasing the usefulness of the program, and consequently the complexity, by implementing it with fixed length integers, or a more efficient way to terminate at the proper length.
+
+For simpler proofs we may try to prove by hand and verifiy proof with a checker like Metamath or we may use a verification tool, either PVS or Boogie (Microsoft). The more complicated version would definitely need a verification tool.
+
+Arithmetic Coding resources:
+
+Intro to practical arithmetic coding:
+http://michael.dipperstein.com/arithmetic/
+
+Example of state of the art compressor using arithmetic coding: http://en.wikipedia.org/wiki/PAQ
+
+Bijective arithmetic coding:
+http://www3.sympatico.ca/mt0000/biacode/biacode.html
