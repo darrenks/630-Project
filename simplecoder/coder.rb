@@ -2,7 +2,8 @@ require 'elias_gamma'
 require 'util'
 
 #this is the number of bits used in computations, although the results are stored in a longer integer
-N=2**Nbits=32
+Nbits = 32
+N=2**Nbits
 
 def encode(string, predictor)
 	lo=0
@@ -28,10 +29,10 @@ def encode(string, predictor)
 	#todo what if lo=000000000000 ?? could pick 0 instead
 	i=nbits-1
 	while lo[i]==hi[i]
-		bits<<hi[i]
+		bits << hi[i]
 		i-=1
 	end
-	bits<<1 #(could be implicit if it werent for bytes conversion)
+	bits << 1 #(could be implicit if it werent for bytes conversion)
 	bits2str(int2bits(string.length)+bits)
 end
 
@@ -49,7 +50,7 @@ def decode(string, predictor)
 		end
 		
 		cum=predictor.get_ranges()
-		out<<c=cum.index{|i| r*i/cum[256]>x }-1
+		out << c=cum.index{|i| r*i/cum[256]>x }-1
 		predictor.set_next_symbol(c)
 	
 		x-=r*cum[c]/cum[256]

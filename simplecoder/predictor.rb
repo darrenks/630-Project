@@ -7,7 +7,7 @@ class Predictor
 	end
 	
 	def set_next_symbol(sym)
-		@sofar<<sym
+		@sofar << sym
 	end
 	
 	def get_ranges()
