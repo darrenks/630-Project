@@ -1,8 +1,17 @@
+Boogie:
+
 boogie on linux tutorial
 http://www.zvonimir.info/2010/12/a-tutorial-for-running-boogie-and-z3-on-linux/
 
 boogie paper
 http://research.microsoft.com/en-us/um/people/leino/papers/krml178.pdf
 
+PVS:
+
 pvs info
 http://pvs.csl.sri.com/
+
+Arithmetic Coding:
+http://michael.dipperstein.com/arithmetic/
+
+http://www3.sympatico.ca/mt0000/biacode/biacode.html

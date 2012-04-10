@@ -1,0 +1,31 @@
+Hello Prof. Cleaveland,
+
+Here is our progress report. We also had a question at the end.
+
+1. Your team members
+
+Darren Smith and Yunus Basagalar
+
+
+2. The topic you are pursuing 
+
+Verifying an arithmetic encoding algorithm
+
+
+3. The materials (papers, tools, etc.) you have consulted or are planning to consult and 4. The tasks that you have completed
+
+We read material to understand how arithmetic encoding/decoding works.
+We implemented a simple version of the algorithm in Ruby.
+We inspected PVS verifying tool and documentation for it.
+We tried Boogie and skimmed its documentation:  Boogie Architecture Overview and Boogie Language Reference.
+We implemented toy examples with Boogie and saw how it works in practice.
+We looked suitable language constructs in Boogie to convert our implementation to Boogie Language.
+
+5. The tasks that remain to be completed, and a rough timeline for completing them.
+A proof for encoding part. (0-1 weeks)
+A proof for decoding part. (0-1 weeks)
+Integrating proof. (1-2 weeks)
+If time permits, we will try to prove additional things, such as more parts of the total compression package, or possibly proving a bijective encoding method.
+Prepare presentation. (overlaps with the last 1 week we spent on the project)
+
+What is the due date? Is it possible to present before we complete our work, and turn in our final work at the end of the semester?
