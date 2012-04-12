@@ -5,6 +5,9 @@ http://www.zvonimir.info/2010/12/a-tutorial-for-running-boogie-and-z3-on-linux/
 
 boogie paper
 http://research.microsoft.com/en-us/um/people/leino/papers/krml178.pdf
+http://research.microsoft.com/en-us/um/people/leino/papers/krml160.pdf
+
+http://research.microsoft.com/en-us/projects/boogie/
 
 PVS:
 
