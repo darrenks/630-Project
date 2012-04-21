@@ -32,7 +32,7 @@ end
 def decode(x,r)
 	out=''
 	TestString.size.times{		
-		out<<c=PS.index{|i| r*i/Tot>x }-1
+		out << c=PS.index{|i| r*i/Tot>x }-1
 	
 		x-=r*PS[c]/Tot
 		r=r*PS[c+1]/Tot-r*PS[c]/Tot

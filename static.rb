@@ -25,11 +25,11 @@ def encode(string)
 	hi=lo+r-1
 	i=nbits-1
 	while lo[i]==hi[i]
-		bits<<hi[i]
+		bits << hi[i]
 		i-=1
 	end
 	
-	bits<<1
+	bits << 1
 	bits
 end
 
