@@ -52,7 +52,9 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 
 	len := length(string);
 	// Calculate static intervals
-	i := 0;
+
+	Cum[0] := 0;
+	i := 1;
 	while (i < 256)
 	{
 	  Cum[i] := Cum[i-1] + count(string, i, len-1);
