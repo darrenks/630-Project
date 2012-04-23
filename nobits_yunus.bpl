@@ -31,6 +31,12 @@ axiom(forall string: String, c: char, i: int :: (i >= 0 && string[i]!=c) ==> (co
 axiom(forall string: String, c: char, i: int :: (i < 0) ==> (count(string, c, i) == 0));
 
 
+// summation of elements in array
+function summation(A: [int]int, i: int) returns(int);
+axiom(forall A: [int]int, i: int :: {summation(A, i-1)} summation(A, i) == (A[i] + summation(A, i-1)));
+axiom(forall A: [int]int, i: int :: (i < 0) ==> summation(A, i) == 0);
+
+
 var Cum: [int]int;
 var Tot: int;
 
@@ -56,12 +62,19 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 	Cum[0] := 0;
 	i := 1;
 	while (i < 256)
+  invariant(i <= 256);
+	invariant(Cum[0] == 0);
+	invariant(forall k: int:: {Cum[k-1]} ((1 <= k) && (k < i)) ==> (Cum[k] == Cum[k-1] + count(string, k, len-1)));
 	{
 	  Cum[i] := Cum[i-1] + count(string, i, len-1);
 		i := i + 1;
 	}
 	Tot := Cum[i - 1];
-	
+
+	assert(Cum[0] == 0);
+	assert(forall k: int:: {Cum[k-1]} ((1 <= k) && (k < 256)) ==> (Cum[k] == Cum[k-1] + count(string, k, len-1)));
+	assert(Tot == Cum[255]); // TODO: assert(Tot == len)
+
 	
   // ENCODING PART
 	lo := 0;
@@ -75,33 +88,37 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 
 		i := 0;
 		while (i < len) {
-		  lo := lo + ((r * Cum[i]) / Tot);
-			r := ((r * Cum[i+1])/Tot) - ((r * Cum[i])/Tot);
+		  c := string[i];
+		  lo := lo + ((r * Cum[c-1]) / Tot);
+			r := ((r * Cum[c])/Tot) - ((r * Cum[c-1])/Tot);
 		}
 
 		r0 := r0 * 2;
 	}
 
+	assert(r != 0);
 
 	// DECODING PART
 	r := r0 / 2;
 	x := lo;
 	i := 0;
 	while (i < len)
+	invariant(i <= len);
 	{
 	  c := 0;
 
-		while (((r*c) / Tot) <= x)
+		while (((r*Cum[c]) / Tot) <= x)
 		{
 				c := c + 1;
 		}
-		c := c - 1;
 		
 	  out[i] := c;
-	  x := x - ((r * Cum[c]) / Tot);
-		r := ((r * Cum[c+1]) / Tot) - ((r * Cum[c]) / Tot);
+	  x := x - ((r * Cum[c-1]) / Tot);
+		r := ((r * Cum[c]) / Tot) - ((r * Cum[c-1]) / Tot);
 	  i := i + 1;
 	}
+
+	assert(i == len);
 	out[i] := 0;
 }
 
