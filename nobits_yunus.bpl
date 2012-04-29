@@ -17,12 +17,25 @@ type char = int;
 // We will meet this specifications by using ensures and requires.
 type String = [int]int;
 
-// return length of a string
-function length(string: String) returns(int);
-axiom(forall string: String :: {length(string)} length(string) >= 0);
-axiom(forall string: String :: {length(string)} string[length(string)] == 0);
+var Cum: [int]int;
+var Tot: int;
 
-// compare two strings. return true if they are equal. Otherwise, return false.
+const r0: int;
+
+const len: int;
+axiom(len > 0);
+
+const string: String;
+axiom (string[len] == 0);
+axiom (forall k: int :: string[k] >= 0 && string[k] < 256);
+axiom (exists k:int :: (k > 0 && string[k] == 0) && (forall j:int :: (k != j) ==> (string[j] != 0)));
+
+// return length of a str
+function length(str: String) returns(int);
+axiom(forall str: String :: {length(str)} length(str) >= 0);
+axiom(forall str: String :: {length(str)} str[length(str)] == 0);
+
+// compare two strs. return true if they are equal. Otherwise, return false.
 function cmpstr(str1: String, str2: String) returns(bool);
 axiom(forall str1, str2: String :: cmpstr(str1, str2) ==> ((length(str1) == length(str2)) && (forall i: int :: (i>=0 && i<length(str1)) ==> (str1[i] == str2[i]))));
 axiom(forall str1, str2: String :: !cmpstr(str1, str2) ==> ((length(str1) != length(str2)) || (exists i: int :: (i>=0 && i<length(str1)) && (str1[i] != str2[i]))));
@@ -32,12 +45,12 @@ axiom(forall str1, str2: String, l: int :: {cmpstrn(str1, str2, l)} (l >= 0 && c
 axiom(forall str1, str2: String, l: int :: {cmpstrn(str1, str2, l)} (l >= 0 && !cmpstrn(str1, str2, l)) ==> ((str1[l] != str2[l]) || !cmpstrn(str1, str2, dec(l))));
 axiom(forall str1, str2: String, l: int :: {cmpstrn(str1, str2, l)} (l < 0) ==> cmpstrn(str1, str2, l));
 
-// count how many 'c' exists upto 'upper_limit' in 'string'
-function count(string: String, 	c: char, upper_limit: int) returns(int);
-axiom(forall string: String, c: char, i: int :: {count(string, c, i)} count(string, c, i) >= 0);
-axiom(forall string: String, c: char, i: int :: {count(string, c, i)} (i < 0) ==> (count(string, c, i) == 0));
-axiom(forall string: String, c: char, i: int :: {count(string, c, i)} (i >= 0 && string[i]!=c) ==> (count(string, c, i) == count(string, c, dec(i))));
-axiom(forall string: String, c: char, i: int :: {count(string, c, i)} (i >= 0 && string[i]==c) ==> (count(string, c, i) == (1 + count(string, c, dec(i)))));
+// count how many 'c' exists upto 'upper_limit' in 'str'
+function count(str: String, c: char, upper_limit: int) returns(int);
+axiom(forall str: String, c: char, k: int :: {count(str, c, k)} count(str, c, k) >= 0);
+axiom(forall str: String, c: char, k: int :: {count(str, c, k)} (k < 0) ==> (count(str, c, k) == 0));
+axiom(forall str: String, c: char, k: int :: {count(str, c, k)} (k >= 0 && str[k]!=c) ==> (count(str, c, k) == count(str, c, dec(k))));
+axiom(forall str: String, c: char, k: int :: {count(str, c, k)} (k >= 0 && str[k]==c) ==> (count(str, c, k) == (1 + count(str, c, dec(k)))));
 
 
 // summation of elements in array
@@ -45,21 +58,13 @@ function summation(A: [int]int, i: int) returns(int);
 axiom(forall A: [int]int, i: int :: {summation(A, dec(i))} summation(A, i) == (A[i] + summation(A, dec(i))));
 axiom(forall A: [int]int, i: int :: (i < 0) ==> summation(A, i) == 0);
 
-var Cum: [int]int;
-var Tot: int;
 
-const r0: int;
-
-
-procedure encodeAndDecode(string: String) returns(out: String);
-  requires (forall j:int :: (string[j] < 256 && string[j] >= 0));
-  requires (exists i:int :: (i >= 0 && string[i] == 0) && (forall j:int :: (i != j) ==> (string[j] != 0)));
+procedure encodeAndDecode() returns(out: String);
 	modifies Cum, Tot;
 	ensures (forall j:int :: (out[j] < 256 && out[j] >= 0));
-  ensures (exists i:int :: (i >= 0 && out[i] == 0) && (forall j:int :: (i != j) ==> (out[j] != 0)));
-  ensures (cmpstrn(string, out, length(string)));
+  ensures (cmpstrn(string, out, len));
 
-implementation encodeAndDecode(string: String) returns(out: String) {
+implementation encodeAndDecode() returns(out: String) {
 
   var lo,r: int;
 	var r_lower: int;
@@ -67,21 +72,18 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 	var i: int;
 	var x: int;
 	var c: char;
-	var len: int;	
 	var deneme: String;
 
-  assume (forall j:int :: j >= 0 ==> (deneme[j] < 256 && deneme[j] >= 0));
-  assume (exists k:int :: (k >= 0 && deneme[k] == 0) && (forall j:int :: (k != j) ==> (deneme[j] != 0)));
-	assume (deneme[3] == 0);
+//  assume (forall j:int :: j >= 0 ==> (deneme[j] < 256 && deneme[j] >= 0));
+//  assume (exists k:int :: (k >= 0 && deneme[k] == 0) && (forall j:int :: (k != j) ==> (deneme[j] != 0)));
+//	assume (deneme[3] == 0);
 
-	len := length(string);
-	// Calculate static intervals
-
-	assert(len >= 0);
-	assert(string[len]==0);
-	assert(length(deneme) == 3);
-	assert(count(deneme, 0, length(deneme)) == 1);
-	assert(count(string, 0, len) >= 1);
+//	assert(len >= 0);
+//	assert(string[len]==0);
+//	assert(length(deneme) == 3);
+//	assert(count(deneme, 0, length(deneme)) == 1);
+//	assert(count(string, 0, len) == 1);
+//	assert(forall k: int :: k == len <==> string[k] == 0);
 
 	Cum[0] := 0;
 	i := 1;
@@ -93,10 +95,11 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 	  Cum[i] := Cum[dec(i)] + count(string, i, dec(len));
 		i := i + 1;
 	}
-	Tot := Cum[i - 1];
+	Tot := Cum[dec(i)];
 
 	assert(Cum[0] == 0);
 	assert(forall k: int:: {Cum[dec(k)]} ((1 <= k) && (k < 256)) ==> ((Cum[k] - Cum[dec(k)]) == count(string, k, dec(len))));
+//	assert(forall k: int:: {Cum[dec(k)]} ((1 <= k) && (k < 256)) ==> ((Cum[dec(k)] <= Cum[k])));
 //	assert(Tot == len);
 
 
@@ -144,7 +147,7 @@ implementation encodeAndDecode(string: String) returns(out: String) {
 	assert(r_arr[-1] == r);
 	while (i < len)
 	invariant(i <= len);
-	invariant(i == 2 ==> r == r_arr[dec(2)]);
+	invariant(r == r_arr[dec(i)]);
 	invariant(x == lo_arr[dec(len-i)]);
 //  invariant(exists k: int :: (0 <= k) && (k < 256) && (((r * Cum[k]) / Tot) > x));
 //	invariant(forall k: int :: {string[k]} {out[k]} (0 <= k && k < i) ==> (out[k] == string[k]));
