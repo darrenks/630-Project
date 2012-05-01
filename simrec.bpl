@@ -18,15 +18,42 @@ var out: [int]int;
 function get_lo_range(sym: int, range: int) returns(int);
 //axiom (forall i,r: int :: {get_lo_range(i,r)} get_lo_range(i,r)==r*i/nsyms);
 axiom (forall i,r: int :: {get_lo_range(i,r)} get_lo_range(i,r)>=0 && get_lo_range(i,r) < get_hi_range(i,r));
+axiom (forall i,j,r: int :: i<j ==> get_lo_range(i, r) < get_lo_range(j, r));
+axiom (forall r: int :: r>0 ==> get_lo_range(0, r)==0);
 
 function get_hi_range(sym: int, range: int) returns(int);
 //axiom (forall i,r: int :: {get_hi_range(i,r)} get_hi_range(i,r)==r*(i+1)/nsyms);
 axiom (forall i,r: int :: {get_hi_range(i,r)} get_hi_range(i,r)<=r && get_lo_range(i,r) < get_hi_range(i,r));
+axiom (forall i,r: int :: get_hi_range(i,r) == get_lo_range(i+1, r)); //<= works too
 
-function lookup(x: int, range: int) returns(int);
-//pre? x>=0 && x<r ==> 
-//axiom (forall x,r: int :: {lookup(x,r)} x>=get_lo_range(lookup(x,r), r) && x<get_hi_range(lookup(x,r), r));
-axiom (forall x,r,y: int :: y==lookup(x,r) <==> x>=get_lo_range(y, r) && x<get_hi_range(y, r));
+procedure get_hi_rangep(sym: int, range: int) returns(hi: int)
+requires sym>=0 && sym<nsyms;
+requires range>0;
+ensures hi == get_hi_range(sym, range);
+{
+    hi := get_hi_range(sym, range); //TODO
+}
+
+// function lookup(x: int, range: int) returns(int);
+// //pre? x>=0 && x<r ==> 
+// //axiom (forall x,r: int :: {lookup(x,r)} x>=get_lo_range(lookup(x,r), r) && x<get_hi_range(lookup(x,r), r));
+// axiom (forall xx,r,y: int :: y==lookup(xx,r) <==> xx>=get_lo_range(y, r) && xx<get_hi_range(y, r));
+
+procedure lookup(x: int, range: int) returns(y: int)
+requires x>=0 && x<range;
+ensures x>=get_lo_range(y, range) && x<get_hi_range(y, range);
+ensures (forall yy: int :: yy != y ==> x<get_lo_range(yy, range) || x>=get_hi_range(yy, range));
+{
+    y := 0;
+    while (get_hi_range(y, range)<=x)
+    invariant x>=get_lo_range(y, range);
+    {
+        y := y+1;
+    }
+    //these help it run faster
+    assert (forall yy: int :: yy > y ==> x<get_lo_range(yy, range));
+    assert (forall yy: int :: yy < y ==> x>=get_hi_range(yy, range));
+}
 
 function encodef(ind: int, range: int) returns (int);
 axiom (forall i,r: int :: {encodef(i, r)} i>=len ==> encodef(i, r) == 0);
@@ -70,7 +97,7 @@ procedure decode(ind: int, range: int, x: int)
     var c, lo, hi: int;
     assume (range > 0); // TODO
     if (ind>=len) { return; }
-    c := lookup(x, range);
+    call c := lookup(x, range);
     //assert(x == encodef(ind, range) ==> c==in[ind]);
     //assume (c == in[ind]); //TODO this is cheating
     lo := get_lo_range(c, range);
