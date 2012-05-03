@@ -9,6 +9,8 @@ axiom(forall x: int :: {dec(x)} dec(x) == (x-1));
 function inc(x :int) returns(int);
 axiom(forall x: int :: {inc(x)} inc(x) == (x+1));
 
+axiom(forall x,y: int :: (y == x+1) ==> (dec(y) == x));
+
 // Just to specify we have some specific need from this type. i.e. any char is less than 256 and greater than -1.
 // We will meet this specifications by using ensures and requires.
 type char = int;
@@ -61,8 +63,8 @@ axiom(forall A: [int]int, i: int :: (i < 0) ==> summation(A, i) == 0);
 
 procedure encodeAndDecode() returns(out: String);
 	modifies Cum, Tot;
-	ensures (forall j:int :: (out[j] < 256 && out[j] >= 0));
-  ensures (cmpstrn(string, out, len));
+//	ensures (forall j:int :: (out[j] < 256 && out[j] >= 0));
+//  ensures (cmpstrn(string, out, len));
 
 implementation encodeAndDecode() returns(out: String) {
 
@@ -72,62 +74,41 @@ implementation encodeAndDecode() returns(out: String) {
 	var i: int;
 	var x: int;
 	var c: char;
-	var deneme: String;
-
-//  assume (forall j:int :: j >= 0 ==> (deneme[j] < 256 && deneme[j] >= 0));
-//  assume (exists k:int :: (k >= 0 && deneme[k] == 0) && (forall j:int :: (k != j) ==> (deneme[j] != 0)));
-//	assume (deneme[3] == 0);
-
-//	assert(len >= 0);
-//	assert(string[len]==0);
-//	assert(length(deneme) == 3);
-//	assert(count(deneme, 0, length(deneme)) == 1);
-//	assert(count(string, 0, len) == 1);
-//	assert(forall k: int :: k == len <==> string[k] == 0);
 
 	Cum[0] := 0;
 	i := 1;
 	while (i < 256)
   invariant(i <= 256);
-	invariant(Cum[0] == 0);
-	invariant(forall k: int:: {Cum[dec(k)]} ((1 <= k) && (k < i)) ==> (Cum[k] == Cum[dec(k)] + count(string, k, dec(len))));
+	invariant(Cum[dec(1)] == 0);
+	invariant(forall k: int:: ((1 <= k) && (k < i)) ==> (Cum[k] == Cum[dec(k)] + count(string, k, dec(len))));
 	{
 	  Cum[i] := Cum[dec(i)] + count(string, i, dec(len));
 		i := i + 1;
 	}
 	Tot := Cum[dec(i)];
 
-	assert(Cum[0] == 0);
-	assert(forall k: int:: {Cum[dec(k)]} ((1 <= k) && (k < 256)) ==> ((Cum[k] - Cum[dec(k)]) == count(string, k, dec(len))));
-//	assert(forall k: int:: {Cum[dec(k)]} ((1 <= k) && (k < 256)) ==> ((Cum[dec(k)] <= Cum[k])));
-//	assert(Tot == len);
-
-
+	
   // ENCODING PART
-
   lo := 0;
 	r := r0;
 	r_lower := dec(r0);
 
-	r_arr[-1] := r;
-	lo_arr[-1] := lo;
+	r_arr[dec(0)] := r;
+	lo_arr[dec(0)] := lo;
 		
 	i := 0;
 	while (i < len)
 	invariant(i <= len);
 	invariant(r_arr[dec(0)] == r0);
-	invariant(lo_arr[dec(0)] == 0);
-	invariant((lo == lo_arr[dec(i)]) && (r == r_arr[dec(i)]));
-	invariant(forall k: int :: {Cum[string[k]], Cum[dec(string[k])], r_arr[dec(k)], lo_arr[dec(k)]} (0 <= k && k < i) ==> (r_arr[k] == (((r_arr[dec(k)] * Cum[string[k]]) / Tot) - ((r_arr[dec(k)] * Cum[dec(string[k])]) / Tot))));  // TODO: without trigger hangs
-	invariant(forall k: int :: {Cum[dec(string[k])], r_arr[dec(k)], lo_arr[dec(k)]} (0 <= k && k < i) ==> (lo_arr[k] == (lo_arr[dec(k)] + ((r_arr[dec(k)] * Cum[dec(string[k])]) / Tot))));  // TODO: without trigger hangs
-//	invariant(forall k: int :: {Cum[string[k]], r_arr[dec(k)], lo_arr[dec(k)]} (0 <= k && k < i) ==> (((r_arr[dec(k)] * Cum[string[k]]) / Tot) > lo_arr[dec(k)]));
+	invariant(forall k: int :: {r_arr[dec(k)]} ((k == i) ==> r_arr[dec(k)] == r) && (0 <= k && k < i) ==> (r_arr[k] == (((r_arr[dec(k)] * Cum[string[k]]) / Tot) - ((r_arr[dec(k)] * Cum[dec(string[k])]) / Tot))));
 	{
 	  c := string[i];
 
 	  lo_arr[i] := lo + ((r * Cum[dec(c)]) / Tot);
 		lo := lo_arr[i];
 
-		r_arr[i] := ((r * Cum[c])/Tot) - ((r * Cum[dec(c)])/Tot);
+		assert(r == r_arr[dec(i)]);
+		r_arr[i] := ((r_arr[dec(i)] * Cum[c])/Tot) - ((r_arr[dec(i)] * Cum[dec(c)])/Tot);
 		r := r_arr[i];
 
 		r_lower := ((r_lower * Cum[c])/Tot) - ((r_lower * Cum[dec(c)])/Tot);
@@ -144,13 +125,10 @@ implementation encodeAndDecode() returns(out: String) {
 	r := r0;
 	x := lo;
 	i := 0;
-	assert(r_arr[-1] == r);
+	assert(r_arr[dec(0)] == r0);
 	while (i < len)
 	invariant(i <= len);
-	invariant(r == r_arr[dec(i)]);
-	invariant(x == lo_arr[dec(len-i)]);
-//  invariant(exists k: int :: (0 <= k) && (k < 256) && (((r * Cum[k]) / Tot) > x));
-//	invariant(forall k: int :: {string[k]} {out[k]} (0 <= k && k < i) ==> (out[k] == string[k]));
+//	invariant(r == r_arr[dec(i)]);
 	{
 //	  c := 0;
 
