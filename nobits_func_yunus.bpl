@@ -34,7 +34,10 @@ axiom(forall r: int, c1,c2: char, cum: [char]int :: (c1 == c2) <==>
 						 char2range(r, c2, cum) < get_upper_bound(r, c1, cum)));
 
 function int2char(r: int, cum: [char]int, x: int) returns(char);
-axiom(forall r: int, cum: [char]int, x: int :: (r >= 0 && x >= 0) ==> (exists c: char :: (int2char(r, cum, x) == c) && ((get_lower_bound(r, c, cum) <= x) && (x < get_upper_bound(r, c, cum)))));
+axiom(forall r: int, cum: [char]int, x: int :: (r >= 0 && x >= 0) ==>
+                                           (exists c: char :: (int2char(r, cum, x) == c) &&
+																					 ((get_lower_bound(r, c, cum) <= x) &&
+																					  (x < get_upper_bound(r, c, cum)))));
 
 const r0: int;
 						 
