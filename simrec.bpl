@@ -19,19 +19,29 @@ function get_lo_range(sym: int, range: int) returns(int);
 //axiom (forall i,r: int :: {get_lo_range(i,r)} get_lo_range(i,r)==r*i/nsyms);
 axiom (forall i,r: int :: {get_lo_range(i,r)} get_lo_range(i,r)>=0 && get_lo_range(i,r) < get_hi_range(i,r));
 axiom (forall i,j,r: int :: i<j ==> get_lo_range(i, r) < get_lo_range(j, r));
-axiom (forall r: int :: r>0 ==> get_lo_range(0, r)==0);
+axiom (forall r: int :: {get_lo_range(0, r)} r>0 ==> get_lo_range(0, r)==0);
+axiom (forall r: int :: {get_lo_range(nsyms,r)} r>0 ==> get_lo_range(nsyms, r)==r);
 
+axiom (forall i,r: int :: {get_lo_range(i,r)} get_lo_range(i, r)==i*r/nsyms);
+
+procedure get_lo_rangep(sym: int, range: int) returns(lo: int)
+requires sym>=0 && sym<=nsyms;
+requires range>0;
+ensures lo == get_lo_range(sym, range);
+{
+    lo := sym*range/nsyms;
+}
 function get_hi_range(sym: int, range: int) returns(int);
 //axiom (forall i,r: int :: {get_hi_range(i,r)} get_hi_range(i,r)==r*(i+1)/nsyms);
 axiom (forall i,r: int :: {get_hi_range(i,r)} get_hi_range(i,r)<=r && get_lo_range(i,r) < get_hi_range(i,r));
-axiom (forall i,r: int :: get_hi_range(i,r) == get_lo_range(i+1, r)); //<= works too
+axiom (forall i,r: int :: {get_hi_range(i,r)} get_hi_range(i,r) == get_lo_range(i+1, r)); //<= works too
 
 procedure get_hi_rangep(sym: int, range: int) returns(hi: int)
 requires sym>=0 && sym<nsyms;
 requires range>0;
 ensures hi == get_hi_range(sym, range);
 {
-    hi := get_hi_range(sym, range); //TODO
+    call hi := get_lo_rangep(sym+1, range); //TODO
 }
 
 // function lookup(x: int, range: int) returns(int);
@@ -44,10 +54,14 @@ requires x>=0 && x<range;
 ensures x>=get_lo_range(y, range) && x<get_hi_range(y, range);
 ensures (forall yy: int :: yy != y ==> x<get_lo_range(yy, range) || x>=get_hi_range(yy, range));
 {
+    var hi: int;
     y := 0;
-    while (get_hi_range(y, range)<=x)
+    while (true)
     invariant x>=get_lo_range(y, range);
+    invariant y<nsyms;
     {
+        call hi := get_hi_rangep(y, range);
+        if (hi>x) { break; }
         y := y+1;
     }
     //these help it run faster
@@ -77,8 +91,8 @@ procedure encode(ind: int, range: int) returns (x: int)
     assume (range > 0); // TODO
     if (ind>=len) { x:= 0; return; }
     c := in[ind];
-    lo := get_lo_range(c, range);
-    hi := get_hi_range(c, range);
+    call lo := get_lo_rangep(c, range);
+    call hi := get_hi_rangep(c, range);
     call x := encode(ind+1, hi-lo);
     
     x := x+lo;
@@ -98,9 +112,9 @@ procedure decode(ind: int, range: int, x: int)
     assume (range > 0); // TODO
     if (ind>=len) { return; }
     call c := lookup(x, range);
-    //assert(x == encodef(ind, range) ==> c==in[ind]);
-    //assume (c == in[ind]); //TODO this is cheating
-    lo := get_lo_range(c, range);
+    
+    assume(c>=0 && c<=nsyms); //TODO
+    call lo := get_lo_rangep(c, range); assert(lo == get_lo_range(c, range));
     hi := get_hi_range(c, range);
     //assume (x>=lo); // TODO
     call decode(ind+1, hi-lo, x-lo);
