@@ -1,0 +1,12 @@
+Verifying Arithmetic Coding with Boogie
+Darren Smith and Yunus Basagalar
+
+-simplecoder is the simple ruby implementation of arithmetic coding
+
+-nobits_yunus.bpl is a procedural attempt at the proof
+
+-simrec.bpl is a recursive proof (pretty messy, has some proofs for lemmas math)
+
+-simrec2.bpl is a cleaner recursive proof, but lemmas are unproved (note that it doesn't have anything specific to arithmetic coding, but arithmetic coding satisifies the lemmas and would no not harder to show this)
+
+-presentation.pdf is our final presentation
